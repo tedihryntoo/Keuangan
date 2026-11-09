@@ -1,0 +1,875 @@
+
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>DailyFlow - Personal Dashboard</title>
+
+<style>
+/* ===== TEMA APLIKASI ===== */
+:root {
+  --bg:#0b1120;
+  --panel:#111b2d;
+  --panel2:#17243a;
+  --border:#29374d;
+  --text:#e6edf7;
+  --muted:#94a3b8;
+  --green:#34d399;
+  --cyan:#67e8f9;
+  --red:#fb7185;
+  --yellow:#fbbf24;
+}
+* { box-sizing:border-box; }
+body {
+  margin:0;
+  background:var(--bg);
+  color:var(--text);
+  font:14px Arial,sans-serif;
+}
+button,input,select,textarea { font:inherit; }
+button { cursor:pointer; }
+button:focus-visible,input:focus-visible,
+select:focus-visible,textarea:focus-visible {
+  outline:2px solid var(--cyan);
+  outline-offset:2px;
+}
+
+/* ===== SIDEBAR DAN NAVIGASI ===== */
+.sidebar {
+  position:fixed;
+  top:0;bottom:0;left:0;
+  width:235px;
+  padding:22px 14px;
+  background:#0e1727;
+  border-right:1px solid var(--border);
+  z-index:10;
+  transition:transform .2s;
+}
+.brand {
+  padding:5px 10px 28px;
+  font-size:22px;
+  font-weight:bold;
+}
+.brand b { color:var(--green); }
+.brand-icon {
+  display:inline-grid;
+  place-items:center;
+  width:34px;height:34px;
+  margin-right:7px;
+  border-radius:10px;
+  background:var(--green);
+  color:#052e23;
+}
+.nav-label {
+  padding:12px 10px;
+  color:var(--muted);
+  font-size:10px;
+  letter-spacing:1.5px;
+}
+.nav-btn {
+  display:flex;
+  gap:12px;
+  align-items:center;
+  width:100%;
+  margin:4px 0;
+  padding:13px 12px;
+  color:var(--muted);
+  background:transparent;
+  border:0;
+  border-radius:9px;
+  text-align:left;
+}
+.nav-btn:hover,.nav-btn.active {
+  color:var(--green);
+  background:#173329;
+}
+.nav-btn .ico { width:20px;text-align:center;font-size:17px; }
+.sidebar-bottom {
+  position:absolute;
+  bottom:20px;
+  left:22px;
+  color:var(--muted);
+  font-size:11px;
+  line-height:2;
+}
+.main { margin-left:235px;min-width:0; }
+.topbar {
+  height:72px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  padding:0 28px;
+  background:#0e1727;
+  border-bottom:1px solid var(--border);
+}
+.topbar h2 { margin:0;font-size:18px; }
+.topbar p { margin:5px 0 0;color:var(--muted);font-size:12px; }
+.top-left { display:flex;align-items:center;gap:12px; }
+.menu-toggle {
+  display:none;
+  padding:8px 11px;
+  background:var(--panel2);
+  border:1px solid var(--border);
+  color:var(--text);
+  border-radius:8px;
+}
+.content { max-width:1500px;margin:auto;padding:28px; }
+.page.hidden,.hidden { display:none!important; }
+
+/* ===== KARTU DAN RINGKASAN ===== */
+.heading {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:12px;
+  flex-wrap:wrap;
+  margin-bottom:22px;
+}
+.heading h1 { margin:0 0 7px;font-size:24px; }
+.heading p { margin:0;color:var(--muted); }
+.grid { display:grid;gap:16px; }
+.stats { grid-template-columns:repeat(4,minmax(0,1fr)); }
+.card {
+  min-width:0;
+  padding:19px;
+  background:var(--panel);
+  border:1px solid var(--border);
+  border-radius:12px;
+}
+.stat-label { color:var(--muted);font-size:12px; }
+.stat-value {
+  margin-top:14px;
+  font-size:22px;
+  font-weight:bold;
+  overflow-wrap:anywhere;
+}
+.green { color:var(--green); }
+.red { color:var(--red); }
+.cyan { color:var(--cyan); }
+.yellow { color:var(--yellow); }
+.two-col { grid-template-columns:repeat(2,minmax(0,1fr)); }
+.section-title {
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  flex-wrap:wrap;
+  margin-bottom:15px;
+}
+.section-title h3 { margin:0;font-size:15px; }
+
+/* ===== TOMBOL DAN FORM ===== */
+.btn {
+  padding:9px 12px;
+  color:var(--text);
+  background:var(--panel2);
+  border:1px solid var(--border);
+  border-radius:7px;
+}
+.btn:hover { filter:brightness(1.15); }
+.btn-primary {
+  color:#052e23;
+  background:var(--green);
+  border-color:var(--green);
+  font-weight:bold;
+}
+.btn-danger { color:var(--red); }
+.btn-small { padding:6px 8px;font-size:12px; }
+.actions { display:flex;gap:6px;flex-wrap:wrap; }
+.form-grid {
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:13px;
+}
+.field { display:flex;flex-direction:column;gap:7px;min-width:0; }
+.field.full { grid-column:1/-1; }
+.field label { color:var(--muted);font-size:12px; }
+.field input,.field select,.field textarea,.search {
+  width:100%;
+  min-width:0;
+  padding:11px;
+  background:#0b1423;
+  border:1px solid var(--border);
+  border-radius:7px;
+  color:var(--text);
+}
+.field textarea { min-height:90px;resize:vertical; }
+.field input[type=color] { height:42px; }
+
+/* ===== TABEL HISTORI ===== */
+.table-wrap {
+  width:100%;
+  overflow-x:auto;
+  border-radius:7px;
+}
+table {
+  width:100%;
+  min-width:650px;
+  border-collapse:collapse;
+}
+th,td {
+  padding:13px 11px;
+  text-align:left;
+  border-bottom:1px solid var(--border);
+  vertical-align:middle;
+}
+th {
+  background:#172337;
+  color:var(--muted);
+  font-size:11px;
+  text-transform:uppercase;
+  letter-spacing:.4px;
+  white-space:nowrap;
+}
+td { font-size:12px;line-height:1.5;overflow-wrap:anywhere; }
+tbody tr:hover { background:#172337; }
+.badge {
+  display:inline-block;
+  padding:5px 8px;
+  border-radius:6px;
+  background:#253249;
+  color:var(--muted);
+  font-size:11px;
+  white-space:nowrap;
+}
+.badge.done { background:#12352c;color:var(--green); }
+.badge.progress { background:#12323d;color:var(--cyan); }
+.badge.pending { background:#382e19;color:var(--yellow); }
+.badge.high { background:#3b202c;color:var(--red); }
+.badge.medium { background:#382e19;color:var(--yellow); }
+.badge.low { background:#12352c;color:var(--green); }
+.empty {
+  padding:25px;
+  text-align:center;
+  color:var(--muted);
+}
+.check { accent-color:var(--green);width:17px;height:17px; }
+.strike { text-decoration:line-through;opacity:.55; }
+.note-color {
+  display:inline-block;
+  width:12px;height:12px;
+  border-radius:4px;
+  vertical-align:middle;
+  margin-right:5px;
+}
+footer {
+  padding:25px 0 0;
+  text-align:center;
+  color:var(--muted);
+  font-size:11px;
+}
+.overlay { display:none; }
+
+/* ===== RESPONSIF HP ===== */
+@media(max-width:1050px) {
+  .stats { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+@media(max-width:700px) {
+  .sidebar { width:250px;transform:translateX(-100%); }
+  .sidebar.open { transform:translateX(0); }
+  .main { margin-left:0; }
+  .menu-toggle { display:block; }
+  .overlay.show {
+    display:block;position:fixed;inset:0;
+    background:#0009;z-index:9;
+  }
+  .topbar { padding:0 14px; }
+  .content { padding:20px 13px; }
+  .two-col { grid-template-columns:1fr; }
+  .heading h1 { font-size:21px; }
+  .stat-value { font-size:19px; }
+}
+@media(max-width:380px) {
+  .stats,.form-grid { grid-template-columns:1fr; }
+  .field.full { grid-column:auto; }
+}
+</style>
+</head>
+<body>
+
+<aside class="sidebar" id="sidebar">
+  <div class="brand"><span class="brand-icon">✦</span>Daily<b>Flow</b></div>
+  <div class="nav-label">MENU UTAMA</div>
+  <button class="nav-btn active" data-page="dashboard"><span class="ico">▦</span>Dashboard</button>
+  <button class="nav-btn" data-page="schedule"><span class="ico">▣</span>Jadwal Kegiatan</button>
+  <button class="nav-btn" data-page="finance"><span class="ico">◈</span>Keuangan</button>
+  <button class="nav-btn" data-page="notes"><span class="ico">▤</span>Catatan</button>
+  <button class="nav-btn" data-page="wishlist"><span class="ico">☑</span>Kebutuhan</button>
+  <div class="sidebar-bottom">
+    PERSONAL WORKSPACE<br>
+    ● Data tersimpan lokal<br>
+    DailyFlow v1.0
+  </div>
+</aside>
+<div class="overlay" id="overlay"></div>
+
+<main class="main">
+  <header class="topbar">
+    <div class="top-left">
+      <button class="menu-toggle" id="menuToggle" aria-label="Buka menu">☰</button>
+      <div>
+        <h2 id="topTitle">Dashboard</h2>
+        <p id="todayLabel"></p>
+      </div>
+    </div>
+    <span class="badge done">● LOCAL MODE</span>
+  </header>
+
+  <div class="content">
+
+    <!-- ===== DASHBOARD ===== -->
+    <section class="page" id="page-dashboard">
+      <div class="heading">
+        <div><h1>Dashboard Saya 👋</h1><p>Ringkasan aktivitas harianmu.</p></div>
+        <button class="btn btn-primary" onclick="navigate('schedule');openForm('schedule')">+ Tambah Kegiatan</button>
+      </div>
+
+      <div class="grid stats">
+        <div class="card"><div class="stat-label">Total Pemasukan</div><div class="stat-value green" id="dIncome">Rp0</div></div>
+        <div class="card"><div class="stat-label">Total Pengeluaran</div><div class="stat-value red" id="dExpense">Rp0</div></div>
+        <div class="card"><div class="stat-label">Saldo Bersih</div><div class="stat-value cyan" id="dBalance">Rp0</div></div>
+        <div class="card"><div class="stat-label">Kegiatan Selesai</div><div class="stat-value" id="dTasks">0/0</div></div>
+      </div>
+
+      <div class="grid two-col" style="margin-top:18px">
+        <div class="card">
+          <div class="section-title"><h3>Jadwal Terbaru</h3><button class="btn btn-small" onclick="navigate('schedule')">Lihat semua</button></div>
+          <div class="table-wrap"><table>
+            <thead><tr><th>Tanggal</th><th>Kegiatan</th><th>Status</th></tr></thead>
+            <tbody id="dSchedule"></tbody>
+          </table></div>
+        </div>
+        <div class="card">
+          <div class="section-title"><h3>Transaksi Terbaru</h3><button class="btn btn-small" onclick="navigate('finance')">Lihat semua</button></div>
+          <div class="table-wrap"><table>
+            <thead><tr><th>Tanggal</th><th>Kategori</th><th>Nominal</th></tr></thead>
+            <tbody id="dFinance"></tbody>
+          </table></div>
+        </div>
+        <div class="card">
+          <div class="section-title"><h3>Catatan Terbaru</h3><button class="btn btn-small" onclick="navigate('notes')">Lihat semua</button></div>
+          <div class="table-wrap"><table>
+            <thead><tr><th>Tanggal</th><th>Judul</th></tr></thead>
+            <tbody id="dNotes"></tbody>
+          </table></div>
+        </div>
+        <div class="card">
+          <div class="section-title"><h3>Kebutuhan Belum Terpenuhi</h3><button class="btn btn-small" onclick="navigate('wishlist')">Lihat semua</button></div>
+          <div class="table-wrap"><table>
+            <thead><tr><th>Nama</th><th>Harga</th><th>Prioritas</th></tr></thead>
+            <tbody id="dWishlist"></tbody>
+          </table></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ===== JADWAL ===== -->
+    <section class="page hidden" id="page-schedule">
+      <div class="heading">
+        <div><h1>Jadwal Kegiatan</h1><p>Semua histori kegiatan dalam tabel.</p></div>
+        <button class="btn btn-primary" onclick="openForm('schedule')">+ Kegiatan</button>
+      </div>
+
+      <div class="card hidden" id="scheduleCard" style="margin-bottom:18px">
+        <div class="section-title"><h3 id="scheduleFormTitle">Tambah Kegiatan</h3><button class="btn btn-small" onclick="closeForm('schedule')">✕</button></div>
+        <form id="scheduleForm" class="form-grid">
+          <input type="hidden" id="sId">
+          <div class="field full"><label>Nama kegiatan *</label><input id="sName" maxlength="120" required placeholder="Contoh: Belajar HTML"></div>
+          <div class="field"><label>Tanggal *</label><input id="sDate" type="date" required></div>
+          <div class="field"><label>Waktu</label><input id="sTime" type="time"></div>
+          <div class="field"><label>Status</label><select id="sStatus"><option>Belum</option><option>Sedang Berjalan</option><option>Selesai</option></select></div>
+          <div class="field"><label>Keterangan</label><input id="sDesc" maxlength="200"></div>
+          <div class="field full actions"><button class="btn btn-primary">Simpan</button><button class="btn" type="button" onclick="closeForm('schedule')">Batal</button></div>
+        </form>
+      </div>
+
+      <div class="card">
+        <div class="section-title">
+          <h3>Histori Kegiatan</h3>
+          <input class="search" id="sSearch" placeholder="Cari kegiatan..." style="max-width:220px">
+        </div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Tanggal</th><th>Waktu</th><th>Kegiatan</th><th>Status</th><th>Aksi</th></tr></thead>
+          <tbody id="sTable"></tbody>
+        </table></div>
+      </div>
+    </section>
+
+    <!-- ===== KEUANGAN ===== -->
+    <section class="page hidden" id="page-finance">
+      <div class="heading">
+        <div><h1>Keuangan</h1><p>Catat semua uang masuk dan keluar.</p></div>
+        <button class="btn btn-primary" onclick="openForm('finance')">+ Transaksi</button>
+      </div>
+
+      <div class="grid stats">
+        <div class="card"><div class="stat-label">Pemasukan</div><div class="stat-value green" id="fIncome">Rp0</div></div>
+        <div class="card"><div class="stat-label">Pengeluaran</div><div class="stat-value red" id="fExpense">Rp0</div></div>
+        <div class="card"><div class="stat-label">Saldo</div><div class="stat-value cyan" id="fBalance">Rp0</div></div>
+        <div class="card"><div class="stat-label">Jumlah Transaksi</div><div class="stat-value" id="fCount">0</div></div>
+      </div>
+
+      <div class="card hidden" id="financeCard" style="margin-top:18px">
+        <div class="section-title"><h3 id="financeFormTitle">Tambah Transaksi</h3><button class="btn btn-small" onclick="closeForm('finance')">✕</button></div>
+        <form id="financeForm" class="form-grid">
+          <input type="hidden" id="fId">
+          <div class="field"><label>Jenis *</label><select id="fType"><option>Pemasukan</option><option>Pengeluaran</option></select></div>
+          <div class="field"><label>Kategori *</label><input id="fCategory" required maxlength="60" placeholder="Makan, gaji, dll."></div>
+          <div class="field"><label>Nominal (Rp) *</label><input id="fAmount" type="number" min="1" step="1" required></div>
+          <div class="field"><label>Tanggal *</label><input id="fDate" type="date" required></div>
+          <div class="field full"><label>Keterangan</label><input id="fDesc" maxlength="200"></div>
+          <div class="field full actions"><button class="btn btn-primary">Simpan Transaksi</button><button class="btn" type="button" onclick="closeForm('finance')">Batal</button></div>
+        </form>
+      </div>
+
+      <div class="card" style="margin-top:18px">
+        <div class="section-title"><h3>Histori Transaksi</h3><button class="btn btn-small" onclick="exportFinance()">Ekspor CSV</button></div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Tanggal</th><th>Kategori</th><th>Jenis</th><th>Nominal</th><th>Keterangan</th><th>Aksi</th></tr></thead>
+          <tbody id="fTable"></tbody>
+        </table></div>
+      </div>
+    </section>
+
+    <!-- ===== CATATAN ===== -->
+    <section class="page hidden" id="page-notes">
+      <div class="heading">
+        <div><h1>Catatan Saya</h1><p>Semua histori catatan dalam tabel.</p></div>
+        <button class="btn btn-primary" onclick="openForm('notes')">+ Catatan</button>
+      </div>
+
+      <div class="card hidden" id="notesCard" style="margin-bottom:18px">
+        <div class="section-title"><h3 id="notesFormTitle">Buat Catatan</h3><button class="btn btn-small" onclick="closeForm('notes')">✕</button></div>
+        <form id="notesForm" class="form-grid">
+          <input type="hidden" id="nId">
+          <div class="field full"><label>Judul *</label><input id="nTitle" required maxlength="120"></div>
+          <div class="field full"><label>Isi catatan *</label><textarea id="nBody" required maxlength="10000"></textarea></div>
+          <div class="field"><label>Warna penanda</label><input id="nColor" type="color" value="#34d399"></div>
+          <div class="field full actions"><button class="btn btn-primary">Simpan Catatan</button><button class="btn" type="button" onclick="closeForm('notes')">Batal</button></div>
+        </form>
+      </div>
+
+      <div class="card">
+        <div class="section-title"><h3>Histori Catatan</h3><input class="search" id="nSearch" placeholder="Cari catatan..." style="max-width:220px"></div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Tanggal</th><th>Judul</th><th>Isi Catatan</th><th>Warna</th><th>Aksi</th></tr></thead>
+          <tbody id="nTable"></tbody>
+        </table></div>
+      </div>
+    </section>
+
+    <!-- ===== KEBUTUHAN ===== -->
+    <section class="page hidden" id="page-wishlist">
+      <div class="heading">
+        <div><h1>Kebutuhan & Wishlist</h1><p>Kelola belanja dan estimasi biaya.</p></div>
+        <button class="btn btn-primary" onclick="openForm('wishlist')">+ Kebutuhan</button>
+      </div>
+
+      <div class="grid stats">
+        <div class="card"><div class="stat-label">Total Estimasi</div><div class="stat-value cyan" id="wTotal">Rp0</div></div>
+        <div class="card"><div class="stat-label">Belum Terpenuhi</div><div class="stat-value yellow" id="wRemain">Rp0</div></div>
+        <div class="card"><div class="stat-label">Sudah Terpenuhi</div><div class="stat-value green" id="wDone">0</div></div>
+        <div class="card"><div class="stat-label">Jumlah Kebutuhan</div><div class="stat-value" id="wCount">0</div></div>
+      </div>
+
+      <div class="card hidden" id="wishlistCard" style="margin-top:18px">
+        <div class="section-title"><h3 id="wishlistFormTitle">Tambah Kebutuhan</h3><button class="btn btn-small" onclick="closeForm('wishlist')">✕</button></div>
+        <form id="wishlistForm" class="form-grid">
+          <input type="hidden" id="wId">
+          <div class="field full"><label>Nama kebutuhan *</label><input id="wName" required maxlength="120"></div>
+          <div class="field"><label>Estimasi harga (Rp) *</label><input id="wPrice" type="number" min="0" step="1" required></div>
+          <div class="field"><label>Prioritas</label><select id="wPriority"><option>Tinggi</option><option selected>Sedang</option><option>Rendah</option></select></div>
+          <div class="field full actions"><button class="btn btn-primary">Simpan</button><button class="btn" type="button" onclick="closeForm('wishlist')">Batal</button></div>
+        </form>
+      </div>
+
+      <div class="card" style="margin-top:18px">
+        <div class="section-title"><h3>Histori Kebutuhan</h3><input class="search" id="wSearch" placeholder="Cari kebutuhan..." style="max-width:220px"></div>
+        <div class="table-wrap"><table>
+          <thead><tr><th>Terpenuhi</th><th>Nama Kebutuhan</th><th>Estimasi Harga</th><th>Prioritas</th><th>Aksi</th></tr></thead>
+          <tbody id="wTable"></tbody>
+        </table></div>
+      </div>
+    </section>
+
+    <footer>© DailyFlow · Personal Dashboard · Data lokal browser</footer>
+  </div>
+</main>
+
+<script>
+/* ===== 1. DATABASE LOKAL ===== */
+const KEY = 'dailyflow_v2';
+
+function loadData() {
+  try {
+    const x = JSON.parse(localStorage.getItem(KEY));
+    if (x && typeof x === 'object') {
+      return {
+        schedules:Array.isArray(x.schedules)?x.schedules:[],
+        finances:Array.isArray(x.finances)?x.finances:[],
+        notes:Array.isArray(x.notes)?x.notes:[],
+        wishlist:Array.isArray(x.wishlist)?x.wishlist:[]
+      };
+    }
+  } catch(e) { console.error(e); }
+  return {schedules:[],finances:[],notes:[],wishlist:[]};
+}
+let db = loadData();
+
+function save() {
+  try {
+    localStorage.setItem(KEY,JSON.stringify(db));
+  } catch(e) {
+    alert('Penyimpanan gagal. Periksa kapasitas browser.');
+  }
+  renderAll();
+}
+
+/* ===== 2. FUNGSI BANTU ===== */
+const $ = id => document.getElementById(id);
+const idNew = () => Date.now().toString(36)+Math.random().toString(36).slice(2,8);
+const today = () => {
+  const d=new Date();
+  return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+};
+const esc = s => String(s??'').replace(/[&<>"']/g,c=>({
+  '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+}[c]));
+const money = n => new Intl.NumberFormat('id-ID',{
+  style:'currency',currency:'IDR',maximumFractionDigits:0
+}).format(Number(n)||0);
+const dateFmt = s => {
+  if(!s)return '-';
+  const a=s.split('-');
+  return a.length===3?a[2]+'/'+a[1]+'/'+a[0]:s;
+};
+const statusCls = s => ({
+  'Selesai':'done','Sedang Berjalan':'progress','Belum':'pending'
+}[s]||'pending');
+const priorityCls = s => ({
+  'Tinggi':'high','Sedang':'medium','Rendah':'low'
+}[s]||'low');
+const colorSafe = c => /^#[0-9a-fA-F]{6}$/.test(c||'')?c:'#34d399';
+const noRows = (cols,msg) =>
+  `<tr><td colspan="${cols}" class="empty">${esc(msg)}</td></tr>`;
+const query = id => $(id).value.trim().toLowerCase();
+
+/* ===== 3. NAVIGASI ===== */
+const titles = {
+  dashboard:'Dashboard',schedule:'Jadwal Kegiatan',
+  finance:'Keuangan',notes:'Catatan',wishlist:'Kebutuhan'
+};
+function navigate(page) {
+  if(!titles[page])return;
+  document.querySelectorAll('.page').forEach(p=>p.classList.add('hidden'));
+  $('page-'+page).classList.remove('hidden');
+  document.querySelectorAll('.nav-btn').forEach(b=>
+    b.classList.toggle('active',b.dataset.page===page)
+  );
+  $('topTitle').textContent=titles[page];
+  $('sidebar').classList.remove('open');
+  $('overlay').classList.remove('show');
+}
+document.querySelectorAll('.nav-btn').forEach(b=>
+  b.addEventListener('click',()=>navigate(b.dataset.page))
+);
+$('menuToggle').onclick=()=>{
+  $('sidebar').classList.toggle('open');
+  $('overlay').classList.toggle('show');
+};
+$('overlay').onclick=()=>{
+  $('sidebar').classList.remove('open');
+  $('overlay').classList.remove('show');
+};
+$('todayLabel').textContent=new Date().toLocaleDateString('id-ID',{
+  weekday:'long',day:'numeric',month:'long',year:'numeric'
+});
+
+/* ===== 4. FORM ===== */
+function openForm(type) {
+  const forms={
+    schedule:['scheduleCard','scheduleForm','sId','sDate','scheduleFormTitle','Tambah Kegiatan'],
+    finance:['financeCard','financeForm','fId','fDate','financeFormTitle','Tambah Transaksi'],
+    notes:['notesCard','notesForm','nId',null,'notesFormTitle','Buat Catatan'],
+    wishlist:['wishlistCard','wishlistForm','wId',null,'wishlistFormTitle','Tambah Kebutuhan']
+  };
+  const f=forms[type];
+  $(f[0]).classList.remove('hidden');
+  $(f[1]).reset();
+  $(f[2]).value='';
+  if(f[3])$(f[3]).value=today();
+  $(f[4]).textContent=f[5];
+  if(type==='n')$('nColor').value='#34d399';
+  if(type==='notes')$('nColor').value='#34d399';
+  if(type==='wishlist')$('wPriority').value='Sedang';
+  $(f[0]).scrollIntoView({behavior:'smooth',block:'start'});
+}
+function closeForm(type) {
+  const ids={schedule:'scheduleCard',finance:'financeCard',notes:'notesCard',wishlist:'wishlistCard'};
+  const forms={schedule:'scheduleForm',finance:'financeForm',notes:'notesForm',wishlist:'wishlistForm'};
+  $(ids[type]).classList.add('hidden');
+  $(forms[type]).reset();
+}
+
+/* ===== 5. JADWAL: TAMBAH, EDIT, HAPUS ===== */
+$('scheduleForm').onsubmit=e=>{
+  e.preventDefault();
+  const id=$('sId').value;
+  const x={
+    id:id||idNew(),name:$('sName').value.trim(),
+    date:$('sDate').value,time:$('sTime').value,
+    status:$('sStatus').value,desc:$('sDesc').value.trim()
+  };
+  if(!x.name||!x.date)return;
+  if(id)db.schedules=db.schedules.map(a=>a.id===id?x:a);
+  else db.schedules.push(x);
+  closeForm('schedule');save();
+};
+function editSchedule(id) {
+  const x=db.schedules.find(a=>a.id===id);if(!x)return;
+  openForm('schedule');
+  $('sId').value=x.id;$('sName').value=x.name;
+  $('sDate').value=x.date;$('sTime').value=x.time||'';
+  $('sStatus').value=x.status;$('sDesc').value=x.desc||'';
+  $('scheduleFormTitle').textContent='Edit Kegiatan';
+}
+function deleteSchedule(id) {
+  if(!confirm('Hapus kegiatan ini?'))return;
+  db.schedules=db.schedules.filter(x=>x.id!==id);save();
+}
+function renderSchedule() {
+  const q=query('sSearch');
+  const arr=[...db.schedules].filter(x=>
+    (x.name+' '+x.desc+' '+x.status).toLowerCase().includes(q)
+  ).sort((a,b)=>(b.date+b.time).localeCompare(a.date+a.time));
+  $('sTable').innerHTML=arr.length?arr.map(x=>`
+    <tr>
+      <td>${dateFmt(x.date)}</td><td>${esc(x.time||'-')}</td>
+      <td><strong>${esc(x.name)}</strong><br><span style="color:var(--muted)">${esc(x.desc||'')}</span></td>
+      <td><select aria-label="Ubah status" onchange="changeStatus('${x.id}',this.value)">
+        ${['Belum','Sedang Berjalan','Selesai'].map(s=>`<option ${x.status===s?'selected':''}>${s}</option>`).join('')}
+      </select></td>
+      <td><div class="actions">
+        <button class="btn btn-small" onclick="editSchedule('${x.id}')">Edit</button>
+        <button class="btn btn-small btn-danger" onclick="deleteSchedule('${x.id}')">Hapus</button>
+      </div></td>
+    </tr>`).join(''):noRows(5,'Belum ada histori kegiatan.');
+}
+function changeStatus(id,status) {
+  db.schedules=db.schedules.map(x=>x.id===id?{...x,status}:x);save();
+}
+$('sSearch').addEventListener('input',renderSchedule);
+
+/* ===== 6. KEUANGAN ===== */
+$('financeForm').onsubmit=e=>{
+  e.preventDefault();
+  const id=$('fId').value,amount=Number($('fAmount').value);
+  if(!Number.isFinite(amount)||amount<=0){alert('Nominal harus lebih dari nol.');return;}
+  const x={
+    id:id||idNew(),type:$('fType').value,
+    category:$('fCategory').value.trim(),amount,
+    date:$('fDate').value,desc:$('fDesc').value.trim()
+  };
+  if(!x.category||!x.date)return;
+  if(id)db.finances=db.finances.map(a=>a.id===id?x:a);
+  else db.finances.push(x);
+  closeForm('finance');save();
+};
+function editFinance(id) {
+  const x=db.finances.find(a=>a.id===id);if(!x)return;
+  openForm('finance');
+  $('fId').value=x.id;$('fType').value=x.type;
+  $('fCategory').value=x.category;$('fAmount').value=x.amount;
+  $('fDate').value=x.date;$('fDesc').value=x.desc||'';
+  $('financeFormTitle').textContent='Edit Transaksi';
+}
+function deleteFinance(id) {
+  if(!confirm('Hapus transaksi ini?'))return;
+  db.finances=db.finances.filter(x=>x.id!==id);save();
+}
+function totals() {
+  const income=db.finances.filter(x=>x.type==='Pemasukan').reduce((s,x)=>s+x.amount,0);
+  const expense=db.finances.filter(x=>x.type==='Pengeluaran').reduce((s,x)=>s+x.amount,0);
+  return {income,expense,balance:income-expense};
+}
+function renderFinance() {
+  const t=totals();
+  $('fIncome').textContent=money(t.income);
+  $('fExpense').textContent=money(t.expense);
+  $('fBalance').textContent=money(t.balance);
+  $('fBalance').className='stat-value '+(t.balance<0?'red':'cyan');
+  $('fCount').textContent=db.finances.length;
+  const arr=[...db.finances].sort((a,b)=>(b.date+b.id).localeCompare(a.date+a.id));
+  $('fTable').innerHTML=arr.length?arr.map(x=>`
+    <tr>
+      <td>${dateFmt(x.date)}</td><td>${esc(x.category)}</td>
+      <td><span class="badge ${x.type==='Pemasukan'?'done':'pending'}">${esc(x.type)}</span></td>
+      <td class="${x.type==='Pemasukan'?'green':'red'}">${x.type==='Pemasukan'?'+':'-'}${money(x.amount)}</td>
+      <td>${esc(x.desc||'-')}</td>
+      <td><div class="actions">
+        <button class="btn btn-small" onclick="editFinance('${x.id}')">Edit</button>
+        <button class="btn btn-small btn-danger" onclick="deleteFinance('${x.id}')">Hapus</button>
+      </div></td>
+    </tr>`).join(''):noRows(6,'Belum ada histori transaksi.');
+}
+function exportFinance() {
+  if(!db.finances.length){alert('Belum ada transaksi.');return;}
+  const q=v=>'"'+String(v??'').replace(/"/g,'""')+'"';
+  const rows=[['Tanggal','Jenis','Kategori','Nominal','Keterangan'],
+    ...db.finances.map(x=>[x.date,x.type,x.category,x.amount,x.desc||''])];
+  const blob=new Blob(['\uFEFF'+rows.map(r=>r.map(q).join(';')).join('\r\n')],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download='histori-keuangan.csv';a.click();
+  setTimeout(()=>URL.revokeObjectURL(url),1000);
+}
+
+/* ===== 7. CATATAN ===== */
+$('notesForm').onsubmit=e=>{
+  e.preventDefault();
+  const id=$('nId').value;
+  const x={
+    id:id||idNew(),title:$('nTitle').value.trim(),
+    body:$('nBody').value.trim(),color:colorSafe($('nColor').value),
+    updated:new Date().toISOString()
+  };
+  if(!x.title||!x.body)return;
+  if(id)db.notes=db.notes.map(a=>a.id===id?x:a);
+  else db.notes.push(x);
+  closeForm('notes');save();
+};
+function editNote(id) {
+  const x=db.notes.find(a=>a.id===id);if(!x)return;
+  openForm('notes');
+  $('nId').value=x.id;$('nTitle').value=x.title;
+  $('nBody').value=x.body;$('nColor').value=colorSafe(x.color);
+  $('notesFormTitle').textContent='Edit Catatan';
+}
+function deleteNote(id) {
+  if(!confirm('Hapus catatan ini?'))return;
+  db.notes=db.notes.filter(x=>x.id!==id);save();
+}
+function renderNotes() {
+  const q=query('nSearch');
+  const arr=[...db.notes].filter(x=>(x.title+' '+x.body).toLowerCase().includes(q))
+    .sort((a,b)=>(b.updated||'').localeCompare(a.updated||''));
+  $('nTable').innerHTML=arr.length?arr.map(x=>`
+    <tr>
+      <td>${x.updated?new Date(x.updated).toLocaleDateString('id-ID'):'-'}</td>
+      <td><strong>${esc(x.title)}</strong></td>
+      <td style="white-space:pre-wrap">${esc(x.body.length>180?x.body.slice(0,180)+'…':x.body)}</td>
+      <td><span class="note-color" style="background:${colorSafe(x.color)}"></span></td>
+      <td><div class="actions">
+        <button class="btn btn-small" onclick="editNote('${x.id}')">Edit</button>
+        <button class="btn btn-small btn-danger" onclick="deleteNote('${x.id}')">Hapus</button>
+      </div></td>
+    </tr>`).join(''):noRows(5,'Belum ada histori catatan.');
+}
+$('nSearch').addEventListener('input',renderNotes);
+
+/* ===== 8. KEBUTUHAN ===== */
+$('wishlistForm').onsubmit=e=>{
+  e.preventDefault();
+  const id=$('wId').value,price=Number($('wPrice').value);
+  if(!Number.isFinite(price)||price<0){alert('Harga tidak valid.');return;}
+  const old=db.wishlist.find(x=>x.id===id);
+  const x={
+    id:id||idNew(),name:$('wName').value.trim(),price,
+    priority:$('wPriority').value,bought:old?old.bought:false
+  };
+  if(!x.name)return;
+  if(id)db.wishlist=db.wishlist.map(a=>a.id===id?x:a);
+  else db.wishlist.push(x);
+  closeForm('wishlist');save();
+};
+function editWish(id) {
+  const x=db.wishlist.find(a=>a.id===id);if(!x)return;
+  openForm('wishlist');
+  $('wId').value=x.id;$('wName').value=x.name;
+  $('wPrice').value=x.price;$('wPriority').value=x.priority;
+  $('wishlistFormTitle').textContent='Edit Kebutuhan';
+}
+function toggleWish(id,checked) {
+  db.wishlist=db.wishlist.map(x=>x.id===id?{...x,bought:checked}:x);save();
+}
+function deleteWish(id) {
+  if(!confirm('Hapus kebutuhan ini?'))return;
+  db.wishlist=db.wishlist.filter(x=>x.id!==id);save();
+}
+function renderWishlist() {
+  const q=query('wSearch');
+  const arr=[...db.wishlist].filter(x=>x.name.toLowerCase().includes(q))
+    .sort((a,b)=>Number(a.bought)-Number(b.bought)||
+    ({Tinggi:0,Sedang:1,Rendah:2}[a.priority]??3)-({Tinggi:0,Sedang:1,Rendah:2}[b.priority]??3));
+  const total=db.wishlist.reduce((s,x)=>s+x.price,0);
+  const remain=db.wishlist.filter(x=>!x.bought).reduce((s,x)=>s+x.price,0);
+  $('wTotal').textContent=money(total);
+  $('wRemain').textContent=money(remain);
+  $('wDone').textContent=db.wishlist.filter(x=>x.bought).length;
+  $('wCount').textContent=db.wishlist.length;
+  $('wTable').innerHTML=arr.length?arr.map(x=>`
+    <tr>
+      <td><input class="check" type="checkbox" ${x.bought?'checked':''}
+        aria-label="Tandai ${esc(x.name)} terpenuhi"
+        onchange="toggleWish('${x.id}',this.checked)"></td>
+      <td class="${x.bought?'strike':''}">${esc(x.name)}</td>
+      <td>${money(x.price)}</td>
+      <td><span class="badge ${priorityCls(x.priority)}">${esc(x.priority)}</span></td>
+      <td><div class="actions">
+        <button class="btn btn-small" onclick="editWish('${x.id}')">Edit</button>
+        <button class="btn btn-small btn-danger" onclick="deleteWish('${x.id}')">Hapus</button>
+      </div></td>
+    </tr>`).join(''):noRows(5,'Belum ada histori kebutuhan.');
+}
+$('wSearch').addEventListener('input',renderWishlist);
+
+/* ===== 9. DASHBOARD: SEMUA RINGKASAN DALAM TABEL ===== */
+function renderDashboard() {
+  const t=totals();
+  $('dIncome').textContent=money(t.income);
+  $('dExpense').textContent=money(t.expense);
+  $('dBalance').textContent=money(t.balance);
+  $('dBalance').className='stat-value '+(t.balance<0?'red':'cyan');
+  const total=db.schedules.length;
+  const done=db.schedules.filter(x=>x.status==='Selesai').length;
+  $('dTasks').textContent=done+'/'+total;
+
+  const s=[...db.schedules].sort((a,b)=>(b.date+b.time).localeCompare(a.date+a.time)).slice(0,5);
+  $('dSchedule').innerHTML=s.length?s.map(x=>`
+    <tr><td>${dateFmt(x.date)}</td><td>${esc(x.name)}</td>
+    <td><span class="badge ${statusCls(x.status)}">${esc(x.status)}</span></td></tr>`
+  ).join(''):noRows(3,'Belum ada kegiatan.');
+
+  const f=[...db.finances].sort((a,b)=>(b.date+b.id).localeCompare(a.date+a.id)).slice(0,5);
+  $('dFinance').innerHTML=f.length?f.map(x=>`
+    <tr><td>${dateFmt(x.date)}</td><td>${esc(x.category)}</td>
+    <td class="${x.type==='Pemasukan'?'green':'red'}">${x.type==='Pemasukan'?'+':'-'}${money(x.amount)}</td></tr>`
+  ).join(''):noRows(3,'Belum ada transaksi.');
+
+  const n=[...db.notes].sort((a,b)=>(b.updated||'').localeCompare(a.updated||'')).slice(0,5);
+  $('dNotes').innerHTML=n.length?n.map(x=>`
+    <tr><td>${x.updated?new Date(x.updated).toLocaleDateString('id-ID'):'-'}</td>
+    <td>${esc(x.title)}</td></tr>`
+  ).join(''):noRows(2,'Belum ada catatan.');
+
+  const w=[...db.wishlist].filter(x=>!x.bought)
+    .sort((a,b)=>({Tinggi:0,Sedang:1,Rendah:2}[a.priority]??3)-({Tinggi:0,Sedang:1,Rendah:2}[b.priority]??3)).slice(0,5);
+  $('dWishlist').innerHTML=w.length?w.map(x=>`
+    <tr><td>${esc(x.name)}</td><td>${money(x.price)}</td>
+    <td><span class="badge ${priorityCls(x.priority)}">${esc(x.priority)}</span></td></tr>`
+  ).join(''):noRows(3,'Semua kebutuhan sudah terpenuhi.');
+}
+
+/* ===== 10. PERBARUI SEMUA TABEL ===== */
+function renderAll() {
+  renderSchedule();
+  renderFinance();
+  renderNotes();
+  renderWishlist();
+  renderDashboard();
+}
+renderAll();
+</script>
+</body>
+</html>
